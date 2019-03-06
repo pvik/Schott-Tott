@@ -144,8 +144,61 @@ class Stack(private val cards: MutableSet<Card>) {
         return sum
     }
 
-    fun stackPossibleInFuture(): Boolean {
+    fun genPossibleSequenceSameSuitStack (from: Int, suit: Suit): List<Stack> {
+        return (from..7).map { r -> Stack(mutableSetOf(Card(suit, r), Card(suit, r+1), Card(suit, r+2)))  }
+                .filter {stackPossibleInFuture()}
+    }
+
+    fun genPossibleSameRankStack (rank: Int): List<Stack> {
+        val possibleCards : List<Card> =
+                ('A'..'F').map { s -> Card(Suit.valueOf(s.toString()), rank) }
+                        .filter { c -> !Board.playedCards.contains(c) }
+
+        val possibleStacks : MutableList<Stack> = mutableListOf()
+
+        if (possibleCards.size >= 3) {
+
+        }
+
+        for (s1 in 'A'..'F') {
+            for (s2 in s1..'F') {
+                (s2..'F').map { s3 -> Stack(mutableSetOf(Card(Suit.valueOf(s1.toString()), rank), Card(Suit.valueOf(s2.toString()), rank), Card(Suit.valueOf(s3.toString()), rank)))  }
+            }
+        }
+        return possibleStacks
+    }
+
+    // Will check if the Stack represented in cards (MutableSet) can be played in the future
+    private fun stackPossibleInFuture(): Boolean {
         return (cards.filter { c -> !Board.playedCards.contains(c)} .size) == 3
+    }
+
+    // Will try to find if there are any possible stacks that can be played that can beat the current stack
+    fun stackCanBeBeatenInFuture() : Boolean {
+        if (cards.size != 3) {
+            // Stack not complete
+            return false
+        } else {
+            val suits : Set<Suit> = cards.stream().map { c -> c.suit }.toList().toSet()
+            val ranks : List<Int> = cards.stream().map { c -> c.rank }.toList().sorted()
+
+            val possibleStacks : MutableList<Stack> = mutableListOf()
+
+            if (suits.size == 1 && Helper.isSequence(ranks)) { // Same Suit & in seq
+
+            }
+            else if (ranks.toSet().size == 1) {   // Same Rank
+
+            }
+            else if (suits.size == 1) {           // Same Suit
+
+            }
+            else if (Helper.isSequence(ranks)) {  // Sequence
+
+            }
+
+            return false
+        }
     }
 
     fun greaterThan (s: Stack) : Boolean {
