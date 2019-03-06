@@ -101,12 +101,8 @@ class Player (val name : String) {
     }
 }
 
-class Stack {
-    private var cards : MutableSet<Card> = mutableSetOf()
-
-    constructor (c : MutableSet<Card>) {
-        this.cards = c
-    }
+class Stack(private val cards: MutableSet<Card>) {
+    //private var cards : MutableSet<Card> = c
 
     fun add(c : Card) {
         if (cards.size < 3)
@@ -126,9 +122,7 @@ class Stack {
         return "$s| (${value()})"
     }
 
-
-
-    fun value(): Int {
+    private fun value(): Int {
 
         var sum : Int = cards.fold(0) { v, c -> v + c.rank  }
 
@@ -143,7 +137,7 @@ class Stack {
                 sum += 200
             else if (s.size == 1)             // Same Suit
                 sum += 100
-            else if (Helper.isSequence(r))           // Sequence
+            else if (Helper.isSequence(r))    // Sequence
                 sum += 50
         }
 
@@ -181,24 +175,24 @@ class Stack {
                                     Card(sSuits.first(), sRanks.max()!! - 1))))
                         }
                     } else if (sRanks.toSet().size == 1) { // Same Rank
-                        ('A'..'F').map() { s -> Card(Suit.valueOf(s.toString()), sRanks.first()) }
+                        ('A'..'F').map { s1 -> Card(Suit.valueOf(s1.toString()), sRanks.first()) }
                                 .filter { c -> !Board.playedCards.contains(c) } // This will include cards in the stack
                                 .map { c -> possibleStacks.add(Stack(mutableSetOf(s.cards.first(), s.cards.last(), c))) }
                     } else if (sSuits.size == 1) { // Same Suit
-                        (1..9).map() { r -> Card(sSuits.first(), r) }
+                        (1..9).map { r -> Card(sSuits.first(), r) }
                                 .filter { c -> !Board.playedCards.contains(c) } // This will include cards in the stack
                                 .map { c -> possibleStacks.add(Stack(mutableSetOf(s.cards.first(), s.cards.last(), c))) }
                     } else if (Helper.isSequence(sRanks)) { // Seq
-                        ('A'..'F').map() { s -> Card(Suit.valueOf(s.toString()), sRanks.max()!! + 1) }
+                        ('A'..'F').map { s1 -> Card(Suit.valueOf(s1.toString()), sRanks.max()!! + 1) }
                                 .filter { c -> !Board.playedCards.contains(c) } // This will include cards in the stack
                                 .map { c -> possibleStacks.add(Stack(mutableSetOf(s.cards.first(), s.cards.last(), c))) }
 
-                        ('A'..'F').map() { s -> Card(Suit.valueOf(s.toString()), sRanks.min()!! - 1) }
+                        ('A'..'F').map { s1 -> Card(Suit.valueOf(s1.toString()), sRanks.min()!! - 1) }
                                 .filter { c -> !Board.playedCards.contains(c) } // This will include cards in the stack
                                 .map { c -> possibleStacks.add(Stack(mutableSetOf(s.cards.first(), s.cards.last(), c))) }
                     } else {
                         // Use highest available rank card not played as third card and calculate value
-                        loop@ for (rankItr in 9..1) {
+                        loop@ for (rankItr in 9 downTo 1) {
                             for (suitItr in ('A'..'F')) {
                                 val c = Card(Suit.valueOf(suitItr.toString()), rankItr)
                                 if (!Board.playedCards.contains(c)) {
@@ -211,7 +205,7 @@ class Stack {
                 }
 
                 val maxPossibleValue = possibleStacks.map { stck -> stck.value() }
-                        .fold(0, { acc, vl -> if (acc > vl) vl else acc })
+                        .fold(0) { acc, vl -> if (acc > vl) vl else acc }
 
                 return value() > maxPossibleValue
             }
@@ -220,7 +214,7 @@ class Stack {
     }
 }
 
-class Stone (val p1: Player, val p2: Player) {
+class Stone (private val p1: Player, private val p2: Player) {
     private var claimed: Boolean = false
     private var claimedBy: Player? = null
 
@@ -229,7 +223,7 @@ class Stone (val p1: Player, val p2: Player) {
     fun play(p: Player, c: Card) {
         battleStacks[p]!!.add(c)
 
-        val otherPlayer : Player = if (p == p1) p2 else p1
+        val otherPlayer = if (p == p1) p2 else p1
         if (battleStacks[p]!!.greaterThan(battleStacks[otherPlayer]!!)) {
             claimed = true
             claimedBy = p
