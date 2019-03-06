@@ -1,7 +1,6 @@
 package org.pvik.st
 
 import org.pvik.st.engine.*
-import kotlin.random.Random
 
 fun main(args: Array<String>) {
 
