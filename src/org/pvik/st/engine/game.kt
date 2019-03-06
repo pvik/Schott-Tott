@@ -23,7 +23,7 @@ class Game {
         gameLoop(0)
     }
 
-    fun gameLoop(p: Int) {
+    private fun gameLoop(p: Int) {
 
         println("===================")
         println("${player[p].name} 's turn\n")
@@ -47,7 +47,7 @@ class Game {
         gameLoop((p+1) %2)
     }
 
-    fun getCardInput(p : Player) : Card {
+    private fun getCardInput(p : Player) : Card {
         print("Play card: ")
         var ip: String
         var valid = false
@@ -74,7 +74,7 @@ class Game {
         return Card.fromString(ip)
     }
 
-    fun getStonePositionInput() : Int {
+    private fun getStonePositionInput() : Int {
         print("Play at: ")
         var ip: String
 
