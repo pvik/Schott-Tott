@@ -119,7 +119,7 @@ class Stack(private val cards: MutableSet<Card>) {
             }
         }
         val s = cards.fold(initialStr) { s, c -> "$s|$c" }
-        return "$s| (${value()})"
+        return "$s| (" + String.format("%3d", value()) + ")"
     }
 
     private fun value(): Int {
