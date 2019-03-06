@@ -4,8 +4,6 @@ import java.lang.System.exit
 
 class Game {
 
-    private lateinit var board : Board
-
     private val player : Array<Player> = Array(2) { i -> Player(i.toString())}
     //private val player = hashMapOf()
 
@@ -15,7 +13,7 @@ class Game {
         player[0] = Player(pl1)
         player[1] = Player(pl2)
 
-        board = Board(player[0], player[1])
+        Board.init(player[0], player[1])
 
         println("Starting New Game")
         println("[ ${player[0].name} ] vs [ ${player[1].name} ]")
@@ -28,7 +26,7 @@ class Game {
         println("===================")
         println("${player[p].name} 's turn\n")
 
-        println(board)
+        println(Board)
 
         println("Your Hand: ${player[p].handStr()}")
 
@@ -37,7 +35,7 @@ class Game {
         val sp = getStonePositionInput()
 
         try {
-            board.play(player[p], c, sp)
+            Board.play(player[p], c, sp)
         }
         catch (e : Exception) {
             println ("Invalid Play ${e.message}")

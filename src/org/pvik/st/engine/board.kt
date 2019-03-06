@@ -1,13 +1,27 @@
 package org.pvik.st.engine
 
-class Board (private val p1: Player, private val p2: Player) {
+object Board {
+    val playedCards : MutableSet<Card> = mutableSetOf()
 
-    private val playedCards : MutableSet<Card> = mutableSetOf()
+    private lateinit var p1: Player
+    private lateinit var p2: Player
 
-    private val border = Array(9) { Stone(p1, p2) }
+    private lateinit var border : Array<Stone>
 
-    private val p1Name = p1.name.substring(0,minOf(3, p1.name.length))
-    private val p2Name = p2.name.substring(0,minOf(3, p2.name.length))
+    private lateinit var p1Name : String
+    private lateinit var p2Name : String
+
+    fun init(pl1 : Player , pl2: Player) {
+        p1 = pl1
+        p1Name = p1.name.substring(0,minOf(3, p1.name.length))
+
+        p2 = pl2
+        p2Name = p2.name.substring(0,minOf(3, p2.name.length))
+
+        border = Array(9) { Stone(p1, p2) }
+
+        playedCards.removeIf { true } // empty playedCards set
+    }
 
     fun play(p: Player, c: Card, stone: Int) {
         p.play(c)
