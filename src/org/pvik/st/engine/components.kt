@@ -140,7 +140,6 @@ class Stack {
             val s : Set<Suit> = cards.stream().map { c -> c.suit }.toList().toSet()
             val r : List<Int> = cards.stream().map { c -> c.rank }.toList().sorted()
 
-
             if (s.size == 1 && isSequence(r)) // Same Suit & in seq
                 sum += 300
             else if (r.toSet().size == 1)     // Same Rank

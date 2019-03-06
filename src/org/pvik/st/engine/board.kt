@@ -1,7 +1,5 @@
 package org.pvik.st.engine
 
-import java.util.*
-
 class Board (private val p1: Player, private val p2: Player) {
 
     private val playedCards : MutableSet<Card> = mutableSetOf()
