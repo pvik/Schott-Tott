@@ -95,6 +95,6 @@ class Game {
             }
         } while (!valid)
 
-        return ip.toInt()
+        return (Integer.parseInt(ip[0].toString()) - 1)
     }
 }
