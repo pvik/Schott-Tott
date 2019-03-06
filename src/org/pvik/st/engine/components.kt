@@ -122,7 +122,7 @@ class Stack {
         return "$s|"
     }
 
-    fun isSequence(l : List<Int>) : Boolean {
+    private fun isSequence(l : List<Int>) : Boolean {
 
         for (i in 1 .. l.size) {
             if ((l[i-1] + 1) != l[i])
@@ -140,17 +140,15 @@ class Stack {
             val s : Set<Suit> = cards.stream().map { c -> c.suit }.toList().toSet()
             val r : List<Int> = cards.stream().map { c -> c.rank }.toList().sorted()
 
-            // Same Suit & in seq
-            s.size == 1 && isSequence(r)
 
-            // Same Rank
-            // r.toSet().size == 3
-
-            // Same Suit
-            // s.size == 1
-
-            // Sequence
-            isSequence(r)
+            if (s.size == 1 && isSequence(r)) // Same Suit & in seq
+                sum += 300
+            else if (r.toSet().size == 1)     // Same Rank
+                sum += 200
+            else if (s.size == 1)             // Same Suit
+                sum += 100
+            else if (isSequence(r))           // Sequence
+                sum += 50
         }
 
         return sum
