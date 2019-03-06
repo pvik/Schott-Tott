@@ -144,6 +144,10 @@ class Stack(private val cards: MutableSet<Card>) {
         return sum
     }
 
+    fun stackPossibleInFuture(): Boolean {
+        return (cards.filter { c -> !Board.playedCards.contains(c)} .size) == 3
+    }
+
     fun greaterThan (s: Stack) : Boolean {
         if (cards.size != 3) {
             // Dont bother comparing till the full stack is played
