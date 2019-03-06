@@ -119,12 +119,12 @@ class Stack {
             }
         }
         val s = cards.fold(initialStr) { s, c -> "$s|$c" }
-        return "$s|"
+        return "$s| (${value()})"
     }
 
     private fun isSequence(l : List<Int>) : Boolean {
 
-        for (i in 1 .. l.size) {
+        for (i in 1 .. (l.size-1)) {
             if ((l[i-1] + 1) != l[i])
                 return false
         }
