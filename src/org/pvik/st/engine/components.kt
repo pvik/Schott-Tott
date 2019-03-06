@@ -102,7 +102,11 @@ class Player (val name : String) {
 }
 
 class Stack {
-    private val cards : MutableSet<Card> = mutableSetOf()
+    private var cards : MutableSet<Card> = mutableSetOf()
+
+    constructor (c : MutableSet<Card>) {
+        this.cards = c
+    }
 
     fun add(c : Card) {
         if (cards.size < 3)
@@ -122,14 +126,7 @@ class Stack {
         return "$s| (${value()})"
     }
 
-    private fun isSequence(l : List<Int>) : Boolean {
 
-        for (i in 1 .. (l.size-1)) {
-            if ((l[i-1] + 1) != l[i])
-                return false
-        }
-        return true
-    }
 
     fun value(): Int {
 
@@ -140,13 +137,13 @@ class Stack {
             val s : Set<Suit> = cards.stream().map { c -> c.suit }.toList().toSet()
             val r : List<Int> = cards.stream().map { c -> c.rank }.toList().sorted()
 
-            if (s.size == 1 && isSequence(r)) // Same Suit & in seq
+            if (s.size == 1 && Helper.isSequence(r)) // Same Suit & in seq
                 sum += 300
             else if (r.toSet().size == 1)     // Same Rank
                 sum += 200
             else if (s.size == 1)             // Same Suit
                 sum += 100
-            else if (isSequence(r))           // Sequence
+            else if (Helper.isSequence(r))           // Sequence
                 sum += 50
         }
 
@@ -154,7 +151,71 @@ class Stack {
     }
 
     fun greaterThan (s: Stack) : Boolean {
+        if (cards.size != 3) {
+            // Dont bother comparing till the full stack is played
+            return false
+        }
+        else if (cards.size == 3) {
 
+            if (s.cards.size == 3) {
+                // both stacks are completed, just compare values
+                return value() > s.value()
+            } else {
+                val sSuits: Set<Suit> = cards.stream().map { c -> c.suit }.toList().toSet()
+                val sRanks: List<Int> = cards.stream().map { c -> c.rank }.toList().sorted()
+
+                val possibleStacks: MutableList<Stack> = mutableListOf()
+
+                if (s.cards.size == 2) {
+                    // find a possible card that can be played in s, which would beat this
+
+                    if (sSuits.size == 1 && Helper.isSequence(sRanks)) { // Same Suit & in Seq
+                        if (!Board.playedCards.contains(Card(sSuits.first(), sRanks.max()!! + 1))) {
+
+                            possibleStacks.add(Stack(mutableSetOf(s.cards.first(), s.cards.last(),
+                                    Card(sSuits.first(), sRanks.max()!! + 1))))
+                        }
+                        if (!Board.playedCards.contains(Card(sSuits.first(), sRanks.min()!! - 1))) {
+
+                            possibleStacks.add(Stack(mutableSetOf(s.cards.first(), s.cards.last(),
+                                    Card(sSuits.first(), sRanks.max()!! - 1))))
+                        }
+                    } else if (sRanks.toSet().size == 1) { // Same Rank
+                        ('A'..'F').map() { s -> Card(Suit.valueOf(s.toString()), sRanks.first()) }
+                                .filter { c -> !Board.playedCards.contains(c) } // This will include cards in the stack
+                                .map { c -> possibleStacks.add(Stack(mutableSetOf(s.cards.first(), s.cards.last(), c))) }
+                    } else if (sSuits.size == 1) { // Same Suit
+                        (1..9).map() { r -> Card(sSuits.first(), r) }
+                                .filter { c -> !Board.playedCards.contains(c) } // This will include cards in the stack
+                                .map { c -> possibleStacks.add(Stack(mutableSetOf(s.cards.first(), s.cards.last(), c))) }
+                    } else if (Helper.isSequence(sRanks)) { // Seq
+                        ('A'..'F').map() { s -> Card(Suit.valueOf(s.toString()), sRanks.max()!! + 1) }
+                                .filter { c -> !Board.playedCards.contains(c) } // This will include cards in the stack
+                                .map { c -> possibleStacks.add(Stack(mutableSetOf(s.cards.first(), s.cards.last(), c))) }
+
+                        ('A'..'F').map() { s -> Card(Suit.valueOf(s.toString()), sRanks.min()!! - 1) }
+                                .filter { c -> !Board.playedCards.contains(c) } // This will include cards in the stack
+                                .map { c -> possibleStacks.add(Stack(mutableSetOf(s.cards.first(), s.cards.last(), c))) }
+                    } else {
+                        // Use highest available rank card not played as third card and calculate value
+                        loop@ for (rankItr in 9..1) {
+                            for (suitItr in ('A'..'F')) {
+                                val c = Card(Suit.valueOf(suitItr.toString()), rankItr)
+                                if (!Board.playedCards.contains(c)) {
+                                    possibleStacks.add(Stack(mutableSetOf(s.cards.first(), s.cards.last(), c)))
+                                    break@loop
+                                }
+                            }
+                        }
+                    }
+                }
+
+                val maxPossibleValue = possibleStacks.map { stck -> stck.value() }
+                        .fold(0, { acc, vl -> if (acc > vl) vl else acc })
+
+                return value() > maxPossibleValue
+            }
+        }
         return false
     }
 }
@@ -163,7 +224,7 @@ class Stone (val p1: Player, val p2: Player) {
     private var claimed: Boolean = false
     private var claimedBy: Player? = null
 
-    private val battleStacks = hashMapOf(p1 to Stack(), p2 to Stack())
+    private val battleStacks = hashMapOf(p1 to Stack(mutableSetOf()), p2 to Stack(mutableSetOf()))
 
     fun play(p: Player, c: Card) {
         battleStacks[p]!!.add(c)
