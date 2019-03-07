@@ -31,7 +31,7 @@ object Board {
 
     override fun toString(): String {
 
-        var s = "      [$p1Name]                  [$p2Name]\n"
+        var s = "      [$p1Name]                         [$p2Name]\n"
         for (i in 0 .. 8) {
             s += "${i+1}  ${border[i]}  ${i+1}\n"
         }

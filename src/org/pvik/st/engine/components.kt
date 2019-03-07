@@ -144,28 +144,76 @@ class Stack(private val cards: MutableSet<Card>) {
         return sum
     }
 
-    fun genPossibleSequenceSameSuitStack (from: Int, suit: Suit): List<Stack> {
-        return (from..7).map { r -> Stack(mutableSetOf(Card(suit, r), Card(suit, r+1), Card(suit, r+2)))  }
-                .filter {stackPossibleInFuture()}
-    }
-
-    fun genPossibleSameRankStack (rank: Int): List<Stack> {
-        val possibleCards : List<Card> =
-                ('A'..'F').map { s -> Card(Suit.valueOf(s.toString()), rank) }
-                        .filter { c -> !Board.playedCards.contains(c) }
-
-        val possibleStacks : MutableList<Stack> = mutableListOf()
+    private fun genPossibleStacks (possibleCards : Set<Card>) : Set<Stack> {
+        val possibleStacks : MutableSet<Stack> = mutableSetOf()
 
         if (possibleCards.size >= 3) {
-
+            for (c1 in possibleCards) {
+                for (c2 in possibleCards) {
+                    for (c3 in possibleCards) {
+                        if (c1 != c2 && c2 != c3 && c1 != c3) {
+                            possibleStacks.add(Stack(mutableSetOf(c1, c2, c3)))
+                        }
+                    }
+                }
+            }
         }
 
+        return possibleStacks
+    }
+
+    private fun genPossibleSequenceSameSuitStack (from: Int, suit: Suit): Set<Stack> {
+        return (from..7).map { r -> Stack(mutableSetOf(Card(suit, r), Card(suit, r+1), Card(suit, r+2)))  }
+                .filter {stackPossibleInFuture()}
+                .toSet()
+    }
+
+    private fun genPossibleSameRankStack (rank: Int): Set<Stack> {
+        val possibleCards : Set<Card> =
+                ('A'..'F').map { s -> Card(Suit.valueOf(s.toString()), rank) }
+                        .filter { c -> !Board.playedCards.contains(c) }
+                        .toSet()
+
+        return genPossibleStacks(possibleCards)
+    }
+
+    private fun genPossibleSameSuitStack (suit: Suit) : Set<Stack> {
+        val possibleCards : Set<Card> =
+                (1..9).map { r -> Card(suit, r) }
+                        .filter { c -> !Board.playedCards.contains(c) }
+                        .toSet()
+
+        return genPossibleStacks(possibleCards)
+    }
+
+    private fun genPossibleSequenceStack (from: Int) : Set<Stack> {
+        val possibleStacks : MutableSet<Stack> = mutableSetOf()
+
         for (s1 in 'A'..'F') {
-            for (s2 in s1..'F') {
-                (s2..'F').map { s3 -> Stack(mutableSetOf(Card(Suit.valueOf(s1.toString()), rank), Card(Suit.valueOf(s2.toString()), rank), Card(Suit.valueOf(s3.toString()), rank)))  }
+            for (s2 in 'A'..'F') {
+                for (s3 in 'A'..'F') {
+                    val suit1 = Suit.valueOf(s1.toString())
+                    val suit2 = Suit.valueOf(s2.toString())
+                    val suit3 = Suit.valueOf(s3.toString())
+
+                    (from..7).map { r -> Stack(mutableSetOf(Card(suit1, r), Card(suit2, r+1), Card(suit3, r+2)))  }
+                            .filter {stackPossibleInFuture()}
+                            .map { s -> possibleStacks.add(s) }
+                }
             }
         }
         return possibleStacks
+    }
+
+    private fun genAnyPossibleStack () : Set<Stack> {
+        val possibleCards : Set<Card> =
+                (1..9).map {
+                    r -> ('A'..'F').map {
+                    s -> Card(Suit.valueOf(s.toString()), r)
+                }
+                }.flatten().toSet()
+
+        return genPossibleStacks(possibleCards)
     }
 
     // Will check if the Stack represented in cards (MutableSet) can be played in the future
@@ -176,8 +224,8 @@ class Stack(private val cards: MutableSet<Card>) {
     // Will try to find if there are any possible stacks that can be played that can beat the current stack
     fun stackCanBeBeatenInFuture() : Boolean {
         if (cards.size != 3) {
-            // Stack not complete
-            return false
+            // Stack not complete, so will assume it can be beaten
+            return true
         } else {
             val suits : Set<Suit> = cards.stream().map { c -> c.suit }.toList().toSet()
             val ranks : List<Int> = cards.stream().map { c -> c.rank }.toList().sorted()
@@ -185,19 +233,40 @@ class Stack(private val cards: MutableSet<Card>) {
             val possibleStacks : MutableList<Stack> = mutableListOf()
 
             if (suits.size == 1 && Helper.isSequence(ranks)) { // Same Suit & in seq
-
+                ('A'..'F').map { c -> Suit.valueOf(c.toString()) }
+                        .map { s -> possibleStacks.addAll(genPossibleSequenceSameSuitStack(ranks.min()!! + 1, s)) }
             }
             else if (ranks.toSet().size == 1) {   // Same Rank
-
+                ('A'..'F').map { c -> Suit.valueOf(c.toString()) }
+                        .map { s -> possibleStacks.addAll(genPossibleSequenceSameSuitStack(1, s)) }
+                (ranks.min()!! + 1 .. 9).map { r -> possibleStacks.addAll(genPossibleSameRankStack(r)) }
             }
             else if (suits.size == 1) {           // Same Suit
-
+                ('A'..'F').map { c -> Suit.valueOf(c.toString()) }
+                        .map { s -> possibleStacks.addAll(genPossibleSequenceSameSuitStack(1, s)) }
+                (1..9).map { r -> possibleStacks.addAll(genPossibleSameRankStack(r)) }
+                ('A'..'F').map { c -> Suit.valueOf(c.toString()) }
+                        .map { s -> possibleStacks.addAll(genPossibleSameSuitStack(s)) }
             }
             else if (Helper.isSequence(ranks)) {  // Sequence
-
+                (1..9).map { r -> possibleStacks.addAll(genPossibleSameRankStack(r)) }
+                ('A'..'F').map { c -> Suit.valueOf(c.toString()) }
+                        .map { s -> possibleStacks.addAll(genPossibleSequenceSameSuitStack(1, s)) }
+                ('A'..'F').map { c -> Suit.valueOf(c.toString()) }
+                        .map { s-> genPossibleSameSuitStack(s) }
+                (ranks.min()!! + 1 .. 9).map {r -> possibleStacks.addAll(genPossibleSequenceStack(r)) }
+            }
+            else {
+                possibleStacks.addAll(genAnyPossibleStack())
             }
 
-            return false
+            try {
+                possibleStacks.toList().first { s -> s.value() > value() }
+            } catch (e : NoSuchElementException) {
+                return true // at least one possible stack has higher value than current stack, current stack CAN be beaten
+            }
+
+            return true
         }
     }
 
@@ -269,6 +338,21 @@ class Stack(private val cards: MutableSet<Card>) {
         }
         return false
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Stack
+
+        if (cards != other.cards) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return cards.hashCode()
+    }
 }
 
 class Stone (private val p1: Player, private val p2: Player) {
@@ -281,11 +365,12 @@ class Stone (private val p1: Player, private val p2: Player) {
         battleStacks[p]!!.add(c)
 
         val otherPlayer = if (p == p1) p2 else p1
-        if (battleStacks[p]!!.greaterThan(battleStacks[otherPlayer]!!)) {
+
+        if (battleStacks[p]!!.greaterThan(battleStacks[otherPlayer]!!) ||
+                (! battleStacks[p]!!.stackCanBeBeatenInFuture())){
             claimed = true
             claimedBy = p
         }
-
     }
 
     override fun toString(): String {
