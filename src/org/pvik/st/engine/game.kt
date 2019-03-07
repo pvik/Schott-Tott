@@ -28,7 +28,7 @@ class Game {
 
         println(Board)
 
-        println("Your Hand: ${player[p].handStr()}")
+        println("${player[p].name}'s Hand: ${player[p].handStr()}")
 
         val c : Card = getCardInput(player[p])
 
