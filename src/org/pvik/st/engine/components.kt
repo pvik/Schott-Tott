@@ -263,7 +263,7 @@ class Stack(private val cards: MutableSet<Card>) {
             try {
                 possibleStacks.toList().first { s -> s.value() > value() }
             } catch (e : NoSuchElementException) {
-                return true // at least one possible stack has higher value than current stack, current stack CAN be beaten
+                return false // at least one possible stack has higher value than current stack, current stack CAN be beaten
             }
 
             return true
@@ -356,7 +356,7 @@ class Stack(private val cards: MutableSet<Card>) {
 }
 
 class Stone (private val p1: Player, private val p2: Player) {
-    private var claimed: Boolean = false
+    var claimed: Boolean = false
     private var claimedBy: Player? = null
 
     private val battleStacks = hashMapOf(p1 to Stack(mutableSetOf()), p2 to Stack(mutableSetOf()))
@@ -364,6 +364,20 @@ class Stone (private val p1: Player, private val p2: Player) {
     fun play(p: Player, c: Card) {
         battleStacks[p]!!.add(c)
 
+        val otherPlayer = if (p == p1) p2 else p1
+
+        if (battleStacks[p]!!.greaterThan(battleStacks[otherPlayer]!!) ||
+                (! battleStacks[p]!!.stackCanBeBeatenInFuture())){
+            claimed = true
+            claimedBy = p
+        }
+    }
+
+    fun checkClaim() {
+        battleStacks.keys.map {p -> checkClaim(p)}
+    }
+
+    fun checkClaim (p : Player) {
         val otherPlayer = if (p == p1) p2 else p1
 
         if (battleStacks[p]!!.greaterThan(battleStacks[otherPlayer]!!) ||

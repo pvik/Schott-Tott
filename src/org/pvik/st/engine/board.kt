@@ -27,6 +27,8 @@ object Board {
         p.play(c)
         border[stone].play(p, c)
         playedCards.add(c)
+
+        border.toList().filter { s -> !s.claimed }.map {s -> s.checkClaim()}
     }
 
     override fun toString(): String {
