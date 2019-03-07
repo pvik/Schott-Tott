@@ -3,3 +3,7 @@ lib/
 out/
 *.iml
 .gradle/
+build/
+gradle/
+gradlew
+gradlew.bat

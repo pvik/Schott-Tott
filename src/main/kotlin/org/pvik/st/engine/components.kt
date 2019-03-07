@@ -1,7 +1,7 @@
 package org.pvik.st.engine
 
 import kotlin.random.Random
-import kotlin.streams.toList
+//import kotlin.streams.toList
 
 enum class Suit {
     A,B,C,D,E,F
@@ -128,8 +128,8 @@ class Stack(private val cards: MutableSet<Card>) {
 
         if (cards.size == 3) {
 
-            val s : Set<Suit> = cards.stream().map { c -> c.suit }.toList().toSet()
-            val r : List<Int> = cards.stream().map { c -> c.rank }.toList().sorted()
+            val s : Set<Suit> = cards.map { c -> c.suit }.toList().toSet()
+            val r : List<Int> = cards.map { c -> c.rank }.toList().sorted()
 
             if (s.size == 1 && Helper.isSequence(r)) // Same Suit & in seq
                 sum += 300
@@ -211,7 +211,7 @@ class Stack(private val cards: MutableSet<Card>) {
                     r -> ('A'..'F').map {
                     s -> Card(Suit.valueOf(s.toString()), r)
                 }
-                }.flatten().toSet()
+                }.flatten().filter {c -> !Board.playedCards.contains(c)}.toSet()
 
         return genPossibleStacks(possibleCards)
     }
@@ -227,8 +227,8 @@ class Stack(private val cards: MutableSet<Card>) {
             // Stack not complete, so will assume it can be beaten
             return true
         } else {
-            val suits : Set<Suit> = cards.stream().map { c -> c.suit }.toList().toSet()
-            val ranks : List<Int> = cards.stream().map { c -> c.rank }.toList().sorted()
+            val suits : Set<Suit> = cards.map { c -> c.suit }.toList().toSet()
+            val ranks : List<Int> = cards.map { c -> c.rank }.toList().sorted()
 
             val possibleStacks : MutableList<Stack> = mutableListOf()
 
@@ -281,8 +281,8 @@ class Stack(private val cards: MutableSet<Card>) {
                 // both stacks are completed, just compare values
                 return value() > s.value()
             } else {
-                val sSuits: Set<Suit> = cards.stream().map { c -> c.suit }.toList().toSet()
-                val sRanks: List<Int> = cards.stream().map { c -> c.rank }.toList().sorted()
+                val sSuits: Set<Suit> = cards.map { c -> c.suit }.toList().toSet()
+                val sRanks: List<Int> = cards.map { c -> c.rank }.toList().sorted()
 
                 val possibleStacks: MutableList<Stack> = mutableListOf()
 
@@ -331,7 +331,7 @@ class Stack(private val cards: MutableSet<Card>) {
                 }
 
                 try {
-                    possibleStacks.toList().first { s -> s.value() > value() }
+                    possibleStacks.toList().first { s1 -> s1.value() > value() }
                 } catch (e : NoSuchElementException) {
                     return true // No possible stack has higher value than current stack
                 }
@@ -378,7 +378,7 @@ class Stone (private val p1: Player, private val p2: Player) {
         battleStacks.keys.map {p -> checkClaim(p)}
     }
 
-    fun checkClaim (p : Player) {
+    private fun checkClaim (p : Player) {
         val otherPlayer = if (p == p1) p2 else p1
 
         if (battleStacks[p]!!.greaterThan(battleStacks[otherPlayer]!!) ||

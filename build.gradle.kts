@@ -1,3 +1,4 @@
+
 buildscript {
     repositories {
         mavenCentral()
@@ -5,13 +6,17 @@ buildscript {
 
     dependencies {
         classpath(kotlin("gradle-plugin", version = "1.3.21"))
-        implementation(kotlin("stdlib-jdk8"))
     }
 }
 plugins {
-    kotlin("jvm")
+    kotlin("jvm") version "1.3.21"
 }
 
-sourceSets["main"].withConvention(KotlinSourceSet::class) {
-    kotlin.srcDir("src")
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(kotlin("stdlib"))
 }
