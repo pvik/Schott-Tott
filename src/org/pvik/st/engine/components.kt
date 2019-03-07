@@ -330,8 +330,8 @@ class Stack(private val cards: MutableSet<Card>) {
                     }
                 }
 
-                val maxPossibleValue = possibleStacks.map { stck -> stck.value() }
-                        .fold(0) { acc, vl -> if (acc > vl) vl else acc }
+                val maxPossibleValue = possibleStacks.map { value() }
+                        .fold(0) { acc, vl -> if (acc > vl) acc else vl }
 
                 return value() > maxPossibleValue
             }
