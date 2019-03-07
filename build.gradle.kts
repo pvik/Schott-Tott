@@ -19,4 +19,6 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
+    implementation("io.github.microutils:kotlin-logging:1.6.24")
+    implementation("org.slf4j:slf4j-log4j12:1.7.5")
 }

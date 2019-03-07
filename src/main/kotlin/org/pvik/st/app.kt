@@ -1,8 +1,13 @@
 package org.pvik.st
 
+import mu.KotlinLogging
 import org.pvik.st.engine.*
 
+private val logger = KotlinLogging.logger {}
+
 fun main(args: Array<String>) {
+
+    logger.info { "Starting..." }
 
     println("Scott Tott")
     println("==========")
